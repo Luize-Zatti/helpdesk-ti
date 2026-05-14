@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const sequelize = require('./config/connection');
+require('./models');
+const routes = require('./routes');
 
 const app = express();
 
@@ -11,6 +13,8 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.json({ message: 'HelpDesk TI API rodando' });
 });
+
+app.use('/api', routes);
 
 const PORT = process.env.PORT || 3001;
 
