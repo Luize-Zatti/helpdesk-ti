@@ -1,17 +1,49 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Ticket, Monitor, FolderTree, Users, BarChart3, LogOut } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 function Layout({ children, breadcrumb }) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { usuario, fazerLogout } = useAuth();
 
+  // Itens do menu com os perfis que podem ver cada item
   const menuItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/chamados', label: 'Chamados', icon: Ticket },
-    { path: '/equipamentos', label: 'Equipamentos', icon: Monitor },
-    { path: '/categorias', label: 'Categorias', icon: FolderTree },
-    { path: '/usuarios', label: 'Usuários', icon: Users },
-    { path: '/relatorios', label: 'Relatórios', icon: BarChart3 }
+    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, perfis: ['admin', 'tecnico'] },
+    { path: '/chamados', label: 'Chamados', icon: Ticket, perfis: ['admin', 'tecnico', 'solicitante'] },
+    { path: '/equipamentos', label: 'Equipamentos', icon: Monitor, perfis: ['admin'] },
+    { path: '/categorias', label: 'Categorias', icon: FolderTree, perfis: ['admin'] },
+    { path: '/usuarios', label: 'Usuários', icon: Users, perfis: ['admin'] },
+    { path: '/relatorios', label: 'Relatórios', icon: BarChart3, perfis: ['admin'] }
   ];
+
+  // Filtra os itens do menu de acordo com o perfil do usuário logado
+  const menuVisivel = menuItems.filter(item =>
+    usuario && item.perfis.includes(usuario.perfil)
+  );
+
+  // Pega as iniciais do nome do usuário (ex: "Admin Sistema" → "AS")
+  function getIniciais(nome) {
+    if (!nome) return '?';
+    const partes = nome.trim().split(' ');
+    if (partes.length === 1) return partes[0][0].toUpperCase();
+    return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
+  }
+
+  // Formata o perfil pra exibir bonito (ex: "admin" → "Administrador")
+  function formatarPerfil(perfil) {
+    const mapa = {
+      admin: 'Administrador',
+      tecnico: 'Técnico',
+      solicitante: 'Solicitante'
+    };
+    return mapa[perfil] || perfil;
+  }
+
+  function handleLogout() {
+    fazerLogout();
+    navigate('/login');
+  }
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f4f6f8' }}>
@@ -42,7 +74,7 @@ function Layout({ children, breadcrumb }) {
         </div>
 
         <nav style={{ flex: 1, padding: '12px' }}>
-          {menuItems.map((item) => {
+          {menuVisivel.map((item) => {
             const Icon = item.icon;
             const ativo = location.pathname.startsWith(item.path);
             return (
@@ -83,24 +115,37 @@ function Layout({ children, breadcrumb }) {
               fontSize: '12px',
               fontWeight: '600'
             }}>
-              AD
+              {getIniciais(usuario?.nome)}
             </div>
-            <div>
-              <div style={{ fontSize: '13px', fontWeight: '500' }}>Admin User</div>
-              <div style={{ fontSize: '11px', color: '#94a3b8' }}>Administrador</div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{
+                fontSize: '13px',
+                fontWeight: '500',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}>
+                {usuario?.nome || 'Usuário'}
+              </div>
+              <div style={{ fontSize: '11px', color: '#94a3b8' }}>
+                {formatarPerfil(usuario?.perfil)}
+              </div>
             </div>
           </div>
-          <button style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            background: 'none',
-            border: 'none',
-            color: '#cbd5e1',
-            fontSize: '13px',
-            padding: '6px 0',
-            cursor: 'pointer'
-          }}>
+          <button
+            onClick={handleLogout}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'none',
+              border: 'none',
+              color: '#cbd5e1',
+              fontSize: '13px',
+              padding: '6px 0',
+              cursor: 'pointer'
+            }}
+          >
             <LogOut size={16} />
             Sair
           </button>
