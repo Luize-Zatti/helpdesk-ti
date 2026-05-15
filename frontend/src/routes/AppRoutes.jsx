@@ -1,9 +1,10 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Login from '../pages/Login';
-import ListaChamados from '../pages/ListaChamados';
-import NovoChamado from '../pages/NovoChamado';
-import NaoEncontrada from '../pages/NaoEncontrada';
-import PrivateRoute from '../components/PrivateRoute';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Login from "../pages/Login";
+import ListaChamados from "../pages/ListaChamados";
+import NovoChamado from "../pages/NovoChamado";
+import NaoEncontrada from "../pages/NaoEncontrada";
+import PrivateRoute from "../components/PrivateRoute";
+import EditarChamado from "../pages/EditarChamado";
 
 function AppRoutes() {
   return (
@@ -36,6 +37,15 @@ function AppRoutes() {
           element={
             <PrivateRoute>
               <NovoChamado />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/chamados/:id/editar"
+          element={
+            <PrivateRoute>
+              <EditarChamado />
             </PrivateRoute>
           }
         />
